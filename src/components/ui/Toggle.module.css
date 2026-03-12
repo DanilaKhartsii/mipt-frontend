@@ -1,0 +1,52 @@
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  gap: 12px;
+}
+
+.labelText {
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.toggleWrapper {
+  position: relative;
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.track {
+  width: 44px;
+  height: 24px;
+  background-color: var(--color-border);
+  border-radius: 12px;
+  transition: background-color 0.2s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.track.checked {
+  background-color: var(--color-primary);
+}
+
+.thumb {
+  width: 20px;
+  height: 20px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.track.checked .thumb {
+  transform: translateX(20px);
+}
