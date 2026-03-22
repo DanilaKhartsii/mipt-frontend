@@ -30,6 +30,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<Record<string, Message[]>>({ '1': mockMessages });
+  const [isLoading, setIsLoading] = useState(false);
 
   const activeChat = chats.find((c) => c.id === activeChatId);
   const activeMessages = activeChatId ? (chatMessages[activeChatId] ?? []) : [];
@@ -46,6 +47,20 @@ const AppLayout: React.FC<AppLayoutProps> = ({
       ...prev,
       [activeChatId]: [...(prev[activeChatId] ?? []), userMsg],
     }));
+    setIsLoading(true);
+    setTimeout(() => {
+      const assistantMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'Это моковый ответ ассистента. Здесь будет настоящий ответ от GigaChat.',
+        timestamp: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+      };
+      setChatMessages((prev) => ({
+        ...prev,
+        [activeChatId]: [...(prev[activeChatId] ?? []), assistantMsg],
+      }));
+      setIsLoading(false);
+    }, 1500);
   };
 
   return (
@@ -72,7 +87,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
         <ChatWindow
           chatTitle={activeChat?.title ?? 'Новый чат'}
           messages={activeMessages}
-          isTyping={false}
+          isTyping={isLoading}
           onSend={handleSend}
           onOpenSettings={() => setSettingsOpen(true)}
           onMenuToggle={() => setSidebarOpen((prev) => !prev)}
