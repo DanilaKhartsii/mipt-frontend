@@ -39,7 +39,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         </button>
       </header>
       <MessageList messages={messages} isTyping={isTyping} />
-      <InputArea onSend={onSend} />
+      <InputArea onSend={onSend} isGenerating={isTyping} />
     </div>
   );
 };

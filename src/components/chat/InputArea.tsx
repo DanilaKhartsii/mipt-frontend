@@ -23,7 +23,7 @@ const InputArea: React.FC<InputAreaProps> = ({ onSend, isGenerating = false, onS
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      if (!isGenerating) handleSend();
     }
   };
 
@@ -47,6 +47,7 @@ const InputArea: React.FC<InputAreaProps> = ({ onSend, isGenerating = false, onS
           placeholder="Введите сообщение... (Enter — отправить, Shift+Enter — новая строка)"
           className={styles.textarea}
           rows={1}
+          disabled={isGenerating}
         />
         {isGenerating ? (
           <button
