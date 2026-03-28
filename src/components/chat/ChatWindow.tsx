@@ -9,20 +9,30 @@ interface ChatWindowProps {
   messages: MessageType[];
   isTyping?: boolean;
   onSend: (text: string) => void;
+  onStop?: () => void;
   onOpenSettings: () => void;
   onMenuToggle?: () => void;
   showMenuBtn?: boolean;
+  theme?: 'light' | 'dark';
+  onThemeChange?: (theme: 'light' | 'dark') => void;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
   chatTitle,
   messages,
-  isTyping = true,
+  isTyping = false,
   onSend,
+  onStop,
   onOpenSettings,
   onMenuToggle,
   showMenuBtn = false,
+  theme = 'light',
+  onThemeChange,
 }) => {
+  const handleThemeToggle = () => {
+    onThemeChange?.(theme === 'light' ? 'dark' : 'light');
+  };
+
   return (
     <div className={styles.window}>
       <header className={styles.header}>
@@ -34,12 +44,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           )}
           <h2 className={styles.title}>{chatTitle}</h2>
         </div>
-        <button className={styles.settingsBtn} onClick={onOpenSettings} title="Настройки">
-          ⚙️
-        </button>
+        <div className={styles.headerRight}>
+          <button
+            className={styles.themeBtn}
+            onClick={handleThemeToggle}
+            title={theme === 'light' ? 'Тёмная тема' : 'Светлая тема'}
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
+          <button className={styles.settingsBtn} onClick={onOpenSettings} title="Настройки">
+            ⚙️
+          </button>
+        </div>
       </header>
       <MessageList messages={messages} isTyping={isTyping} />
-      <InputArea onSend={onSend} isGenerating={isTyping} />
+      <InputArea onSend={onSend} isGenerating={isTyping} onStop={onStop} />
     </div>
   );
 };

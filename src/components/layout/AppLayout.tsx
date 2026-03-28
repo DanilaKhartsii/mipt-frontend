@@ -31,9 +31,18 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<Record<string, Message[]>>({ '1': mockMessages });
   const [isLoading, setIsLoading] = useState(false);
+  const loadingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const activeChat = chats.find((c) => c.id === activeChatId);
   const activeMessages = activeChatId ? (chatMessages[activeChatId] ?? []) : [];
+
+  const handleStop = () => {
+    if (loadingTimerRef.current) {
+      clearTimeout(loadingTimerRef.current);
+      loadingTimerRef.current = null;
+    }
+    setIsLoading(false);
+  };
 
   const handleSend = (text: string) => {
     if (!activeChatId) return;
@@ -48,7 +57,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
       [activeChatId]: [...(prev[activeChatId] ?? []), userMsg],
     }));
     setIsLoading(true);
-    setTimeout(() => {
+    loadingTimerRef.current = setTimeout(() => {
       const assistantMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -60,6 +69,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
         [activeChatId]: [...(prev[activeChatId] ?? []), assistantMsg],
       }));
       setIsLoading(false);
+      loadingTimerRef.current = null;
     }, 1500);
   };
 
@@ -89,9 +99,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           messages={activeMessages}
           isTyping={isLoading}
           onSend={handleSend}
+          onStop={handleStop}
           onOpenSettings={() => setSettingsOpen(true)}
           onMenuToggle={() => setSidebarOpen((prev) => !prev)}
           showMenuBtn={true}
+          theme={theme}
+          onThemeChange={onThemeChange}
         />
       </main>
 
