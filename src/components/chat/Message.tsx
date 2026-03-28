@@ -31,13 +31,15 @@ const Message: React.FC<MessageProps> = ({ message, variant }) => {
           <div className={styles.content}>
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
-          <button
-            className={styles.copyBtn}
-            onClick={handleCopy}
-            title="Копировать"
-          >
-            {copied ? '✓' : '📋'}
-          </button>
+          {variant === 'assistant' && (
+            <button
+              className={styles.copyBtn}
+              onClick={handleCopy}
+              title="Копировать"
+            >
+              {copied ? '✓' : '📋'}
+            </button>
+          )}
         </div>
         <div className={styles.timestamp}>{message.timestamp}</div>
       </div>
