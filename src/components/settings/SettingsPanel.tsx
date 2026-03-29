@@ -1,40 +1,44 @@
 import React, { useState } from 'react';
 import type { Settings } from '../../types';
+import { useChatStore } from '../../store/chatStore';
 import Toggle from '../ui/Toggle';
 import Slider from '../ui/Slider';
 import Button from '../ui/Button';
 import styles from './SettingsPanel.module.css';
 
-const defaultSettings: Settings = {
+const DEFAULT_SETTINGS: Settings = {
   model: 'GigaChat',
   temperature: 0.7,
   topP: 0.9,
   maxTokens: 1024,
   systemPrompt: 'Ты — полезный ИИ-ассистент GigaChat. Отвечай на русском языке.',
-  theme: 'light',
 };
 
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  onThemeChange: (theme: 'light' | 'dark') => void;
-  currentTheme: 'light' | 'dark';
 }
 
-const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onThemeChange, currentTheme }) => {
-  const [settings, setSettings] = useState<Settings>({ ...defaultSettings, theme: currentTheme });
+const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose }) => {
+  const { settings, theme, updateSettings, setTheme, logout } = useChatStore();
+  const [draft, setDraft] = useState<Settings>(settings);
+
+  // Sync draft when panel opens
+  React.useEffect(() => {
+    if (isOpen) setDraft(settings);
+  }, [isOpen]);
 
   const update = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
+    setDraft((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSave = () => {
-    onThemeChange(settings.theme);
+    updateSettings(draft);
     onClose();
   };
 
   const handleReset = () => {
-    setSettings({ ...defaultSettings, theme: currentTheme });
+    setDraft(DEFAULT_SETTINGS);
   };
 
   if (!isOpen) return null;
@@ -51,7 +55,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onThemeC
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Модель</h3>
             <select
-              value={settings.model}
+              value={draft.model}
               onChange={(e) => update('model', e.target.value as Settings['model'])}
               className={styles.select}
             >
@@ -66,7 +70,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onThemeC
             <h3 className={styles.sectionTitle}>Параметры генерации</h3>
             <Slider
               label="Temperature"
-              value={settings.temperature}
+              value={draft.temperature}
               min={0}
               max={2}
               step={0.1}
@@ -74,7 +78,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onThemeC
             />
             <Slider
               label="Top-P"
-              value={settings.topP}
+              value={draft.topP}
               min={0}
               max={1}
               step={0.05}
@@ -84,7 +88,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onThemeC
               <label className={styles.fieldLabel}>Max Tokens</label>
               <input
                 type="number"
-                value={settings.maxTokens}
+                value={draft.maxTokens}
                 min={1}
                 max={32768}
                 onChange={(e) => update('maxTokens', parseInt(e.target.value) || 1)}
@@ -96,7 +100,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onThemeC
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>System Prompt</h3>
             <textarea
-              value={settings.systemPrompt}
+              value={draft.systemPrompt}
               onChange={(e) => update('systemPrompt', e.target.value)}
               className={styles.systemPrompt}
               rows={4}
@@ -108,9 +112,15 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onThemeC
             <h3 className={styles.sectionTitle}>Интерфейс</h3>
             <Toggle
               label="Тёмная тема"
-              checked={settings.theme === 'dark'}
-              onChange={(checked) => update('theme', checked ? 'dark' : 'light')}
+              checked={theme === 'dark'}
+              onChange={(checked) => setTheme(checked ? 'dark' : 'light')}
             />
+          </section>
+
+          <section className={styles.section}>
+            <Button variant="danger" size="sm" onClick={logout}>
+              Выйти из аккаунта
+            </Button>
           </section>
         </div>
 

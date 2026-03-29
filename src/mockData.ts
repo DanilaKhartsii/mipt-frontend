@@ -1,7 +1,7 @@
 import type { Chat, Message } from './types';
 
 export const mockChats: Chat[] = [
-  { id: '1', title: 'Помощь с React компонентами', lastMessage: 'Как использовать useEffect?', lastMessageDate: '12 мар', isActive: true },
+  { id: '1', title: 'Помощь с React компонентами', lastMessage: 'Как использовать useEffect?', lastMessageDate: '12 мар' },
   { id: '2', title: 'Объяснение алгоритмов сортировки', lastMessage: 'Быстрая сортировка работает...', lastMessageDate: '11 мар' },
   { id: '3', title: 'Написание резюме', lastMessage: 'Добавьте раздел о навыках...', lastMessageDate: '10 мар' },
   { id: '4', title: 'Изучение TypeScript', lastMessage: 'Generics позволяют...', lastMessageDate: '9 мар' },
