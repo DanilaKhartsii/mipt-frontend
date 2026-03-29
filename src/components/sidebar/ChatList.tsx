@@ -7,11 +7,9 @@ interface ChatListProps {
   chats: Chat[];
   activeChatId: string | null;
   onSelect: (id: string) => void;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
 }
 
-const ChatList: React.FC<ChatListProps> = ({ chats, activeChatId, onSelect, onEdit, onDelete }) => {
+const ChatList: React.FC<ChatListProps> = ({ chats, activeChatId, onSelect }) => {
   if (chats.length === 0) {
     return <div className={styles.empty}>Чаты не найдены</div>;
   }
@@ -24,8 +22,6 @@ const ChatList: React.FC<ChatListProps> = ({ chats, activeChatId, onSelect, onEd
           chat={chat}
           isActive={chat.id === activeChatId}
           onSelect={onSelect}
-          onEdit={onEdit}
-          onDelete={onDelete}
         />
       ))}
     </div>

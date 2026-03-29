@@ -1,30 +1,27 @@
 import React, { useState } from 'react';
 import Button from '../ui/Button';
 import ErrorMessage from '../ui/ErrorMessage';
+import { useChatStore } from '../../store/chatStore';
 import styles from './AuthForm.module.css';
 
 type Scope = 'GIGACHAT_API_PERS' | 'GIGACHAT_API_B2B' | 'GIGACHAT_API_CORP';
 
-interface AuthFormProps {
-  onAuth: () => void;
-}
+const scopes: Scope[] = ['GIGACHAT_API_PERS', 'GIGACHAT_API_B2B', 'GIGACHAT_API_CORP'];
 
-const AuthForm: React.FC<AuthFormProps> = ({ onAuth }) => {
+const AuthForm: React.FC = () => {
   const [credentials, setCredentials] = useState('');
   const [scope, setScope] = useState<Scope>('GIGACHAT_API_PERS');
-  const [error, setError] = useState('');
+  const { authenticate, isLoading, error, clearError } = useChatStore();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!credentials.trim()) {
-      setError('Поле Credentials не должно быть пустым');
-      return;
+    if (!credentials.trim()) return;
+    try {
+      await authenticate(credentials.trim(), scope);
+    } catch {
+      // error is set in the store
     }
-    setError('');
-    onAuth();
   };
-
-  const scopes: Scope[] = ['GIGACHAT_API_PERS', 'GIGACHAT_API_B2B', 'GIGACHAT_API_CORP'];
 
   return (
     <div className={styles.container}>
@@ -44,9 +41,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuth }) => {
               id="credentials"
               type="password"
               value={credentials}
-              onChange={(e) => { setCredentials(e.target.value); setError(''); }}
+              onChange={(e) => { setCredentials(e.target.value); clearError(); }}
               placeholder="Введите Base64 строку..."
               className={styles.input}
+              disabled={isLoading}
             />
           </div>
 
@@ -64,6 +62,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuth }) => {
                     checked={scope === s}
                     onChange={() => setScope(s)}
                     className={styles.radio}
+                    disabled={isLoading}
                   />
                   <span className={styles.radioText}>{s}</span>
                 </label>
@@ -71,8 +70,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuth }) => {
             </div>
           </div>
 
-          <Button type="submit" variant="primary" size="lg" className={styles.submitBtn}>
-            Войти
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            className={styles.submitBtn}
+            disabled={isLoading || !credentials.trim()}
+          >
+            {isLoading ? 'Вход...' : 'Войти'}
           </Button>
         </form>
       </div>

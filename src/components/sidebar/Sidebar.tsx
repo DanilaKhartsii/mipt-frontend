@@ -1,37 +1,41 @@
 import React, { useState } from 'react';
-import type { Chat } from '../../types';
+import { useNavigate } from 'react-router-dom';
+import { useChatStore } from '../../store/chatStore';
 import Button from '../ui/Button';
 import SearchInput from './SearchInput';
 import ChatList from './ChatList';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {
-  chats: Chat[];
-  activeChatId: string | null;
-  onSelectChat: (id: string) => void;
-  onNewChat: () => void;
-  onEditChat: (id: string) => void;
-  onDeleteChat: (id: string) => void;
+  onSelectChat?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({
-  chats,
-  activeChatId,
-  onSelectChat,
-  onNewChat,
-  onEditChat,
-  onDeleteChat,
-}) => {
+const Sidebar: React.FC<SidebarProps> = ({ onSelectChat }) => {
   const [search, setSearch] = useState('');
+  const navigate = useNavigate();
+  const { chats, activeChatId, createChat } = useChatStore();
 
-  const filteredChats = chats.filter((c) =>
-    c.title.toLowerCase().includes(search.toLowerCase())
+  const filteredChats = chats.filter(
+    (c) =>
+      c.title.toLowerCase().includes(search.toLowerCase()) ||
+      c.lastMessage.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleNewChat = () => {
+    const id = createChat();
+    navigate(`/chat/${id}`);
+    onSelectChat?.();
+  };
+
+  const handleSelectChat = (id: string) => {
+    navigate(`/chat/${id}`);
+    onSelectChat?.();
+  };
 
   return (
     <aside className={styles.sidebar}>
       <div className={styles.header}>
-        <Button onClick={onNewChat} variant="primary" size="md" className={styles.newChatBtn}>
+        <Button onClick={handleNewChat} variant="primary" size="md" className={styles.newChatBtn}>
           + Новый чат
         </Button>
       </div>
@@ -43,9 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <ChatList
           chats={filteredChats}
           activeChatId={activeChatId}
-          onSelect={onSelectChat}
-          onEdit={onEditChat}
-          onDelete={onDeleteChat}
+          onSelect={handleSelectChat}
         />
       </div>
     </aside>

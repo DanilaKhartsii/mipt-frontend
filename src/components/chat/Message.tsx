@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github-dark.css';
 import type { Message as MessageType } from '../../types';
 import styles from './Message.module.css';
 
@@ -29,7 +31,9 @@ const Message: React.FC<MessageProps> = ({ message, variant }) => {
         </div>
         <div className={`${styles.bubble} ${styles[`bubble_${variant}`]}`}>
           <div className={styles.content}>
-            <ReactMarkdown>{message.content}</ReactMarkdown>
+            <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+              {message.content}
+            </ReactMarkdown>
           </div>
           {variant === 'assistant' && (
             <button

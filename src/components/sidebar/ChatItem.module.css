@@ -60,3 +60,15 @@
 .deleteBtn:hover {
   background-color: #fee2e2;
 }
+
+.editInput {
+  width: 100%;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  background: var(--bg-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  padding: 2px 4px;
+  outline: none;
+}
