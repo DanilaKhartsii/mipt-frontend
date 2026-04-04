@@ -1,73 +1,61 @@
-# React + TypeScript + Vite
+# GigaChat Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite приложение — чат-интерфейс для GigaChat API.
 
-Currently, two official plugins are available:
+## Запуск
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Тесты
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Запуск тестов
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm test               # однократный прогон
+npm run test:watch     # режим наблюдения
+npm run test:coverage  # с отчётом покрытия
 ```
+
+### Что покрыто тестами
+
+**Юнит-тесты редьюсера** (`src/store/chatReducer.test.ts`)
+- `ADD_MESSAGE` — новое сообщение добавляется в конец массива
+- `CREATE_CHAT` — создаётся чат с уникальным id, становится активным
+- `DELETE_CHAT` — чат удаляется; при удалении активного сбрасывается `activeChatId`
+- `RENAME_CHAT` — название чата обновляется по id
+
+**localStorage** (`src/store/localStorage.test.ts`)
+- Данные сохраняются при вызове `saveState`
+- Данные корректно восстанавливаются через `loadState`
+- При пустом хранилище возвращается `undefined`
+- При невалидном JSON приложение не падает
+
+**InputArea** (`src/components/chat/InputArea.test.tsx`)
+- Кнопка «Отправить» заблокирована при пустом поле
+- При клике на «Отправить» вызывается `onSend` с текстом
+- Отправка по Enter
+- Shift+Enter не отправляет сообщение
+- Поле очищается после отправки
+- При `isGenerating=true` поле заблокировано, показывается «Стоп»
+
+**Message** (`src/components/chat/Message.test.tsx`)
+- `variant="user"` — текст, имя «Вы», CSS-класс `user`, нет кнопки «Копировать»
+- `variant="assistant"` — текст, имя «GigaChat», CSS-класс `assistant`, есть кнопка «Копировать»
+- Клик на «Копировать» вызывает `clipboard.writeText` с содержимым сообщения
+
+**Sidebar** (`src/components/sidebar/Sidebar.test.tsx`)
+- При пустом запросе отображаются все чаты
+- Поиск фильтрует чаты по названию в реальном времени
+- Поиск регистронезависимый
+- При очистке поиска все чаты возвращаются
+- При нажатии «Удалить» появляется запрос на подтверждение
+- При подтверждении вызывается `onDeleteChat`, при отмене — нет
+
+### Стек
+
+- [Vitest](https://vitest.dev/) — тестовый фреймворк
+- [React Testing Library](https://testing-library.com/react) — компонентные тесты
+- [jsdom](https://github.com/jsdom/jsdom) — DOM-окружение
