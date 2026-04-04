@@ -35,7 +35,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ chat, isActive, onSelect, onEdit, o
           </button>
           <button
             className={`${styles.actionBtn} ${styles.deleteBtn}`}
-            onClick={(e) => { e.stopPropagation(); onDelete(chat.id); }}
+            onClick={(e) => { e.stopPropagation(); if (window.confirm('Удалить чат?')) onDelete(chat.id); }}
             title="Удалить"
           >
             🗑️
