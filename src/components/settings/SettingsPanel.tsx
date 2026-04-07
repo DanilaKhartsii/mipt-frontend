@@ -1,40 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Settings } from '../../types';
 import Toggle from '../ui/Toggle';
 import Slider from '../ui/Slider';
 import Button from '../ui/Button';
 import styles from './SettingsPanel.module.css';
 
-const defaultSettings: Settings = {
-  model: 'GigaChat',
-  temperature: 0.7,
-  topP: 0.9,
-  maxTokens: 1024,
-  systemPrompt: 'Ты — полезный ИИ-ассистент GigaChat. Отвечай на русском языке.',
-  theme: 'light',
-};
-
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  onThemeChange: (theme: 'light' | 'dark') => void;
-  currentTheme: 'light' | 'dark';
+  currentSettings: Settings;
+  onSave: (settings: Settings) => void;
 }
 
-const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onThemeChange, currentTheme }) => {
-  const [settings, setSettings] = useState<Settings>({ ...defaultSettings, theme: currentTheme });
+const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, currentSettings, onSave }) => {
+  const [local, setLocal] = useState<Settings>(currentSettings);
+
+  // Sync local state when panel opens
+  useEffect(() => {
+    if (isOpen) setLocal(currentSettings);
+  }, [isOpen, currentSettings]);
 
   const update = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
+    setLocal((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSave = () => {
-    onThemeChange(settings.theme);
+    onSave(local);
     onClose();
   };
 
   const handleReset = () => {
-    setSettings({ ...defaultSettings, theme: currentTheme });
+    setLocal(currentSettings);
   };
 
   if (!isOpen) return null;
@@ -51,7 +47,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onThemeC
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Модель</h3>
             <select
-              value={settings.model}
+              value={local.model}
               onChange={(e) => update('model', e.target.value as Settings['model'])}
               className={styles.select}
             >
@@ -64,27 +60,13 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onThemeC
 
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Параметры генерации</h3>
-            <Slider
-              label="Temperature"
-              value={settings.temperature}
-              min={0}
-              max={2}
-              step={0.1}
-              onChange={(v) => update('temperature', v)}
-            />
-            <Slider
-              label="Top-P"
-              value={settings.topP}
-              min={0}
-              max={1}
-              step={0.05}
-              onChange={(v) => update('topP', v)}
-            />
+            <Slider label="Temperature" value={local.temperature} min={0} max={2} step={0.1} onChange={(v) => update('temperature', v)} />
+            <Slider label="Top-P" value={local.topP} min={0} max={1} step={0.05} onChange={(v) => update('topP', v)} />
             <div className={styles.field}>
               <label className={styles.fieldLabel}>Max Tokens</label>
               <input
                 type="number"
-                value={settings.maxTokens}
+                value={local.maxTokens}
                 min={1}
                 max={32768}
                 onChange={(e) => update('maxTokens', parseInt(e.target.value) || 1)}
@@ -96,7 +78,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onThemeC
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>System Prompt</h3>
             <textarea
-              value={settings.systemPrompt}
+              value={local.systemPrompt}
               onChange={(e) => update('systemPrompt', e.target.value)}
               className={styles.systemPrompt}
               rows={4}
@@ -108,7 +90,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, onThemeC
             <h3 className={styles.sectionTitle}>Интерфейс</h3>
             <Toggle
               label="Тёмная тема"
-              checked={settings.theme === 'dark'}
+              checked={local.theme === 'dark'}
               onChange={(checked) => update('theme', checked ? 'dark' : 'light')}
             />
           </section>

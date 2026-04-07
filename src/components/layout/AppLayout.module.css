@@ -20,6 +20,13 @@
   display: none;
 }
 
+.sidebarSkeleton {
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--color-sidebar);
+  border-right: 1px solid var(--color-border);
+}
+
 @media (max-width: 768px) {
   .sidebarWrapper {
     position: fixed;

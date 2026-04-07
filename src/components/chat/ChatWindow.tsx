@@ -2,12 +2,15 @@ import React from 'react';
 import type { Message as MessageType } from '../../types';
 import MessageList from './MessageList';
 import InputArea from './InputArea';
+import ErrorBoundary from '../ErrorBoundary';
+import ErrorMessage from '../ui/ErrorMessage';
 import styles from './ChatWindow.module.css';
 
 interface ChatWindowProps {
   chatTitle: string;
   messages: MessageType[];
   isTyping?: boolean;
+  apiError?: string | null;
   onSend: (text: string) => void;
   onStop?: () => void;
   onOpenSettings: () => void;
@@ -21,6 +24,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   chatTitle,
   messages,
   isTyping = false,
+  apiError,
   onSend,
   onStop,
   onOpenSettings,
@@ -57,7 +61,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           </button>
         </div>
       </header>
-      <MessageList messages={messages} isTyping={isTyping} />
+
+      <ErrorBoundary>
+        <MessageList messages={messages} isTyping={isTyping} />
+      </ErrorBoundary>
+
+      {apiError && (
+        <div className={styles.errorContainer}>
+          <ErrorMessage message={apiError} />
+        </div>
+      )}
+
       <InputArea onSend={onSend} isGenerating={isTyping} onStop={onStop} />
     </div>
   );

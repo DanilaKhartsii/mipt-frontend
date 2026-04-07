@@ -1,65 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import AppLayout from './components/layout/AppLayout';
-import AuthForm from './components/auth/AuthForm';
-import type { Chat } from './types';
-import { mockChats } from './mockData';
+import { lazy, Suspense, useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import './styles/theme.css';
 
-const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [chats, setChats] = useState<Chat[]>(mockChats);
-  const [activeChatId, setActiveChatId] = useState<string | null>(mockChats[0]?.id ?? null);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+const AuthPage = lazy(() => import('./pages/AuthPage'));
+const ChatPage = lazy(() => import('./pages/ChatPage'));
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+const PageLoader = () => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: 'var(--color-text-secondary)' }}>
+    Загрузка...
+  </div>
+);
 
-  const handleAuth = () => {
+const skipAuth = import.meta.env.VITE_SKIP_AUTH === 'true';
+
+export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(skipAuth);
+  const [credentials, setCredentials] = useState('');
+  const [scope, setScope] = useState('GIGACHAT_API_PERS');
+
+  const handleAuth = (creds: string, sc: string) => {
+    setCredentials(creds);
+    setScope(sc);
     setIsAuthenticated(true);
   };
 
-  const handleNewChat = () => {
-    const newChat: Chat = {
-      id: Date.now().toString(),
-      title: 'Новый чат',
-      lastMessage: '',
-      lastMessageDate: 'сегодня',
-    };
-    setChats((prev) => [newChat, ...prev]);
-    setActiveChatId(newChat.id);
-  };
-
-  const handleDeleteChat = (id: string) => {
-    setChats((prev) => prev.filter((c) => c.id !== id));
-    if (activeChatId === id) {
-      setActiveChatId(chats.find((c) => c.id !== id)?.id ?? null);
-    }
-  };
-
-  const handleEditChat = (id: string) => {
-    const newTitle = prompt('Введите новое название чата:');
-    if (newTitle?.trim()) {
-      setChats((prev) => prev.map((c) => c.id === id ? { ...c, title: newTitle.trim() } : c));
-    }
-  };
-
-  if (!isAuthenticated) {
-    return <AuthForm onAuth={handleAuth} />;
-  }
-
   return (
-    <AppLayout
-      chats={chats}
-      activeChatId={activeChatId}
-      onSelectChat={setActiveChatId}
-      onNewChat={handleNewChat}
-      onEditChat={handleEditChat}
-      onDeleteChat={handleDeleteChat}
-      theme={theme}
-      onThemeChange={setTheme}
-    />
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route
+          path="/"
+          element={isAuthenticated ? <Navigate to="/chat" replace /> : <AuthPage onAuth={handleAuth} />}
+        />
+        <Route
+          path="/chat/:id?"
+          element={
+            !isAuthenticated
+              ? <Navigate to="/" replace />
+              : <ChatPage credentials={credentials} scope={scope} />
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
-};
-
-export default App;
+}

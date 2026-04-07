@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Chat } from '../../types';
 import Button from '../ui/Button';
 import SearchInput from './SearchInput';
@@ -24,8 +24,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [search, setSearch] = useState('');
 
-  const filteredChats = chats.filter((c) =>
-    c.title.toLowerCase().includes(search.toLowerCase())
+  const filteredChats = useMemo(
+    () => chats.filter((c) => c.title.toLowerCase().includes(search.toLowerCase())),
+    [chats, search],
   );
 
   return (
