@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+}
+
+.retryBtn {
+  padding: 8px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.retryBtn:hover {
+  background: var(--color-bg-tertiary);
+}

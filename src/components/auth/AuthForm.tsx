@@ -6,8 +6,10 @@ import styles from './AuthForm.module.css';
 type Scope = 'GIGACHAT_API_PERS' | 'GIGACHAT_API_B2B' | 'GIGACHAT_API_CORP';
 
 interface AuthFormProps {
-  onAuth: () => void;
+  onAuth: (credentials: string, scope: string) => void;
 }
+
+const skipAuth = import.meta.env.VITE_SKIP_AUTH === 'true';
 
 const AuthForm: React.FC<AuthFormProps> = ({ onAuth }) => {
   const [credentials, setCredentials] = useState('');
@@ -16,12 +18,12 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuth }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!credentials.trim()) {
+    if (!skipAuth && !credentials.trim()) {
       setError('Поле Credentials не должно быть пустым');
       return;
     }
     setError('');
-    onAuth();
+    onAuth(credentials.trim(), scope);
   };
 
   const scopes: Scope[] = ['GIGACHAT_API_PERS', 'GIGACHAT_API_B2B', 'GIGACHAT_API_CORP'];
@@ -36,40 +38,50 @@ const AuthForm: React.FC<AuthFormProps> = ({ onAuth }) => {
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="credentials">
-              Credentials (Base64)
-            </label>
-            <input
-              id="credentials"
-              type="password"
-              value={credentials}
-              onChange={(e) => { setCredentials(e.target.value); setError(''); }}
-              placeholder="Введите Base64 строку..."
-              className={styles.input}
-            />
-          </div>
+          {!skipAuth && (
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="credentials">
+                Credentials (Base64)
+              </label>
+              <input
+                id="credentials"
+                type="password"
+                value={credentials}
+                onChange={(e) => { setCredentials(e.target.value); setError(''); }}
+                placeholder="Введите Base64 строку..."
+                className={styles.input}
+              />
+            </div>
+          )}
+
+          {skipAuth && (
+            <p className={styles.subtitle} style={{ marginBottom: 8 }}>
+              Credentials настроены на сервере
+            </p>
+          )}
 
           {error && <ErrorMessage message={error} />}
 
-          <div className={styles.field}>
-            <label className={styles.label}>Scope</label>
-            <div className={styles.radioGroup}>
-              {scopes.map((s) => (
-                <label key={s} className={styles.radioLabel}>
-                  <input
-                    type="radio"
-                    name="scope"
-                    value={s}
-                    checked={scope === s}
-                    onChange={() => setScope(s)}
-                    className={styles.radio}
-                  />
-                  <span className={styles.radioText}>{s}</span>
-                </label>
-              ))}
+          {!skipAuth && (
+            <div className={styles.field}>
+              <label className={styles.label}>Scope</label>
+              <div className={styles.radioGroup}>
+                {scopes.map((s) => (
+                  <label key={s} className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      name="scope"
+                      value={s}
+                      checked={scope === s}
+                      onChange={() => setScope(s)}
+                      className={styles.radio}
+                    />
+                    <span className={styles.radioText}>{s}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <Button type="submit" variant="primary" size="lg" className={styles.submitBtn}>
             Войти

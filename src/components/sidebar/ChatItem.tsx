@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { memo, useState } from 'react';
 import type { Chat } from '../../types';
 import styles from './ChatItem.module.css';
 
@@ -10,7 +10,7 @@ interface ChatItemProps {
   onDelete: (id: string) => void;
 }
 
-const ChatItem: React.FC<ChatItemProps> = ({ chat, isActive, onSelect, onEdit, onDelete }) => {
+const ChatItem = memo(function ChatItem({ chat, isActive, onSelect, onEdit, onDelete }: ChatItemProps) {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -44,6 +44,6 @@ const ChatItem: React.FC<ChatItemProps> = ({ chat, isActive, onSelect, onEdit, o
       )}
     </div>
   );
-};
+});
 
 export default ChatItem;
